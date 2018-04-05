@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-
+"""
+This
+"""
 import logging
 
 
-class logit():
+class Logit(object):
     """ this
     """
     def __init__(self):
@@ -22,39 +24,46 @@ class logit():
                             format='%(asctime)s:%(levelname)8s: %(message)s', filemode=self.filemode)
         logging.info("Logging started")
 
-    def loginfo(self, output):
+    @staticmethod
+    def loginfo(output):
         """This
         """
         logging.info(output)
 
-    def logwarn(self, output):
+    @staticmethod
+    def logwarn(output):
         """This
         """
         logging.warning(output)
 
-    def logcritical(self, output):
+    @staticmethod
+    def logcritical(output):
         """This"""
         logging.critical(output)
 
-    def logerror(self, output):
+    @staticmethod
+    def logerror(output):
         """This
         """
         logging.error(output)
 
-    def logdebug(self, output):
+    @staticmethod
+    def logdebug(output):
         """This
         """
         logging.debug(output)
 
 
 def main():
-    x = logit()
-    x.logfilename = "./test.log"
-    x.startlog()
-    x.logwarn("test")
-    x.logcritical("test")
-    x.loginfo("test")
-    x.logdebug("test")
+    """This
+    """
+    logger = Logit()
+    logger.logfilename = "./test.log"
+    logger.startlog()
+    logger.logwarn("test")
+    logger.logcritical("test")
+    logger.loginfo("test")
+    logger.logdebug("test")
 
 
 if __name__ == '__main__':
