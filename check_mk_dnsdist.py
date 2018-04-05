@@ -13,7 +13,9 @@ import json
 import urllib2
 
 
-class check_mk_dnsdist:
+class CheckMkDnsDist(object):
+    """ Class to interact with dnsdist API and collect stats compatible with Check_MK
+    """
     def __init__(self):
         self.apiurl = 'http://localhost:8080/api/v1/servers/localhost'
         self.api_password = 'secret'
@@ -23,7 +25,8 @@ class check_mk_dnsdist:
         self.up_threshold = 1           # number of servers up in ap pool to be considered ok
         self.debug = 0
 
-    def call_api(self, url, header):
+    @staticmethod
+    def call_api(url, header):
         """
         Call dnsdist rest API to collect data on server pools/servers and stats
 
@@ -38,13 +41,11 @@ class check_mk_dnsdist:
         """
         Collect the data we need to process and report on the availability of the api to omd
         """
-        status = 0
         checkname = 'dnsdist_api'
-        description = ''
         try:
             self.data = self.call_api(self.apiurl, self.headers)
-        except Exception as e:
-            description = "WARN - API is not responding (" + str(e) + ")"
+        except Exception as error:
+            description = "WARN - API is not responding (" + str(error) + ")"
             status = 1
             self.print_output(status, checkname, "-", description)
             exit(1)
@@ -62,10 +63,10 @@ class check_mk_dnsdist:
         Checks include: Pool status (if all down alert), pool query including per member, qps per pool/member,
         latency av/member.
         """
-        status = 0
-        checkname = ''
-        description = ''
-        perfdata = '-'
+        # status = 0
+        # checkname = ''
+        # description = ''
+        # perfdata = '-'
         temp_list = []
         pool_members = {}
         # Lets extract all the pool names in the dataset.
@@ -121,7 +122,7 @@ class check_mk_dnsdist:
             for item in qps:
                 numqps = item.values()
                 totalqps += int(numqps[0])
-            perf_qps += str(pool) + "=" + "{0:.3f}".format(totalqps, 2) + "|"
+            perf_qps += str(pool) + "=" + "{0:.3f}".format(totalqps) + "|"
 
             # queries check
             totalqueries = 0
@@ -140,7 +141,7 @@ class check_mk_dnsdist:
 
             # calculate av latency for the pool total/number of members
             avg_latency = totallatency / len(latency)
-            perf_latency += str(pool) + "=" + "{0:.3f}".format(avg_latency, 3) + "|"
+            perf_latency += str(pool) + "=" + "{0:.3f}".format(avg_latency) + "|"
 
             # outstanding - amount of pending requests
             totaloutstanding = 0
@@ -185,7 +186,8 @@ class check_mk_dnsdist:
             description = "OK - Server pools are healthy"
         self.print_output(status, checkname, perf_status[:-1], description)
 
-    def print_output(self, status=0, checkname='', perfdata='-', description=''):
+    @staticmethod
+    def print_output(status=0, checkname='', perfdata='-', description=''):
         """
         Print correctly formatted output for check_mk
         """
@@ -228,7 +230,8 @@ class check_mk_dnsdist:
             self.generate_config()
             exit(1)
 
-    def generate_config(self, configfile="/etc/check_mk/check_mk_dnsdist.conf"):
+    @staticmethod
+    def generate_config(configfile="/etc/check_mk/check_mk_dnsdist.conf"):
         """
         Generate a default config file which can be customised by an admin.
         """
@@ -243,8 +246,14 @@ class check_mk_dnsdist:
         os.chmod(configfile, 0755)
 
 
-if __name__ == "__main__":
-    check = check_mk_dnsdist()
+def main():
+    """ Execute check
+    """
+    check = CheckMkDnsDist()
     check.load_config()
     if check.collect_data():
         check.process_data()
+
+
+if __name__ == "__main__":
+    main()
